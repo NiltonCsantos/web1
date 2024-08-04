@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Ação</title>
+</head>
+<body>
+
+<div class="container" style="background: #EE6928; color: #ffffff;">
+    <header style="padding: 2rem; text-align: center;">
+        <h1>WEB1 NOTICIAS</h1>
+        <div>
+            <h2>SEJA BEM VINDO</h2>
+        </div>
+    </header>
+
+    <main style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;">
+        <div style="text-align: center;">
+            <h2>Olá, <span th:text="${fullName}">Nome Usuário</span>!</h2>
+            <br>
+            <h4>Ficamos muito felizes de ter você conosco</h4>
+        </div>
+
+        <div style="text-align: center;">
+            <p>Estamos felizes em ter você aqui. Descubra o melhor do mundo dos veículos agora no seu celular ou computador!</p>
+        </div>
+
+        <div style="text-align: center;">
+            <p>Para fazer login clique no botão abaixo</p>
+            <br>
+            <a th:href="${confirmationUrl}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                Confirmar login
+            </a>
+
+        </div>
+    </main>
+
+    <footer style="background: #756B66; padding: 1rem 0;">
+        <div style="text-align: center;">
+            <h3>Web1</h3>
+        </div>
+        <div style="text-align: center;">
+            <p>Juntos, iremos conectar você aos encantos do mundo dos automóveis, promovendo uma jornada de descobertas que ultrapassa os limites da tela.</p>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>

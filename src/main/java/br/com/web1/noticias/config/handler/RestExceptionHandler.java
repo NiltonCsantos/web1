@@ -1,5 +1,6 @@
 package br.com.web1.noticias.config.handler;
 
+import br.com.web1.noticias.exception.ConflictException;
 import br.com.web1.noticias.exception.NotFoundException;
 import br.com.web1.noticias.exception.RegistredException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,7 +87,7 @@ public class RestExceptionHandler {
         logger.error(ex.getMessage(), ex);
 
         var message = this.gerarRestErrorMessageErroInterno( ex, request, locale);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
     }
 
     @ExceptionHandler(DisabledException.class)
@@ -97,7 +98,7 @@ public class RestExceptionHandler {
         var messagemPersonalizada = ex.getMessage() + ". Para fazer login, acesse o campo ATIVAR CONTA, acesse seu e-mail e clique no link que te enviamos.";
 
         var message = this.gerarRestErrorMessageDinamico(HttpStatus.FORBIDDEN, new DisabledException(messagemPersonalizada), request, locale);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -105,8 +106,18 @@ public class RestExceptionHandler {
 
         logger.error(ex.getMessage(), ex);
 
-        var message = this.gerarRestErrorMessageDinamico(HttpStatus.FORBIDDEN, ex, request, locale);
+        var message = this.gerarRestErrorMessageDinamico(HttpStatus.BAD_REQUEST, ex, request, locale);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<RestErrorMessage> handleAuthException(ConflictException ex, HttpServletRequest request, Locale locale) {
+
+        logger.error(ex.getMessage(), ex);
+
+        var message = this.gerarRestErrorMessageDinamico(HttpStatus.CONFLICT, ex, request, locale);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
     }
 
 

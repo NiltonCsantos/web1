@@ -1,5 +1,6 @@
 package br.com.web1.noticias.service.authentication.impl;
 
+import br.com.web1.noticias.exception.ConflictException;
 import br.com.web1.noticias.exception.NotFoundException;
 import br.com.web1.noticias.exception.RegistredException;
 import br.com.web1.noticias.model.UsuarioEntidade;
@@ -7,7 +8,10 @@ import br.com.web1.noticias.repository.UsuarioRepository;
 import br.com.web1.noticias.service.authentication.AuthenticationService;
 import br.com.web1.noticias.service.authentication.dto.AuthenticationDto;
 import br.com.web1.noticias.service.authentication.form.AuthenticationForm;
+import br.com.web1.noticias.service.authentication.form.DadosRecuperarSenhaAuthenticationForm;
 import br.com.web1.noticias.service.authorization.CustomUserDetailsService;
+import br.com.web1.noticias.service.mail.MailService;
+import br.com.web1.noticias.service.mail.impl.MailServiceImpl;
 import br.com.web1.noticias.service.token.TokenService;
 import br.com.web1.noticias.service.usuario.dto.Usuariodto;
 import br.com.web1.noticias.service.usuario.form.UsuarioForm;
@@ -29,6 +33,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final TokenService tokenService;
 
     private final CustomUserDetailsService customUserDetailsService;
+
+    private final MailService mailService;
 
     @Override
     public Usuariodto criarConta(UsuarioForm form) {
@@ -52,6 +58,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                .build();
 
         this.usuarioRepository.save(usuario);
+
+        String tokenTemp = tokenService.gerarTokenTemporario(usuario);
+
+        mailService.sendMail(usuario.getUsuTxEmail(), usuario.getUsuTxNome(), tokenTemp);
 
         return  new Usuariodto(usuario);
     }
@@ -81,7 +91,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String redefinirSenha() {
-        return null;
+    public Usuariodto confirmarConta(String tokenTemp) {
+
+        var usuTxLogin = tokenService.validarToken(tokenTemp);
+
+        var usuario = this.usuarioRepository.buscarUsuTxLogin(usuTxLogin).orElseThrow(
+                () -> new NotFoundException("Usuario")
+        );
+
+        usuario.setUsuBlAtivo(true);
+        usuarioRepository.save(usuario);
+        return  new Usuariodto(usuario);
+    }
+
+    @Override
+    public Usuariodto redefinirSenha(DadosRecuperarSenhaAuthenticationForm form) {
+
+        var usuario = usuarioRepository.findByUsuTxEmailAndUsuBlAtivo(form.usuTxEmail()).orElseThrow(
+                () -> new NotFoundException("Usuario")
+        );
+
+        if (!form.usuDtNascimento().equals(usuario.getUsuDtNascimento())){
+            throw new ConflictException("data de nascimento incorreta");
+        }
+
+        String encryptedPassword= new BCryptPasswordEncoder().encode(form.usuTxNovaSenha());
+
+        usuario.setUsuTxSenha(encryptedPassword);
+
+        usuarioRepository.save(usuario);
+
+        return  new Usuariodto(usuario);
+
     }
 }

@@ -13,7 +13,15 @@ import java.util.Optional;
 public interface UsuarioRepository extends JpaRepository<UsuarioEntidade, Long> {
 
     UserDetails findByUsuTxLogin(@Param("usuTxlogin") String usuTxlogin);
-
+    @Query(nativeQuery = true,
+            value = """
+                    select 
+                           usu.*
+                           from public.usu_usuario usu
+                           where (upper(usu.usu_tx_email) = :#{#usuTxemail.trim().toUpperCase()} and usu.usu_bl_ativo = true)
+                    """
+    )
+    Optional<UsuarioEntidade> findByUsuTxEmailAndUsuBlAtivo(String usuTxemail);
     @Query(nativeQuery = true,
             value = """
                     select 
