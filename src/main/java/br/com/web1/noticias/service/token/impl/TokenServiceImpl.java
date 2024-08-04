@@ -24,36 +24,50 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String gerarToken(UsuarioEntidade usuarioEntidade) {
-
-        try {
+    public String gerarAcessToken(UsuarioEntidade usuarioEntidade) {
             return   Jwts.builder()
                     .setIssuer("auth-web1-noticias-app")
                     .setSubject(usuarioEntidade.getUsuTxLogin())
                     .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis()+36000000))
+                    .setExpiration(new Date(System.currentTimeMillis()+86400000))
                     .signWith(getSignKey(), SignatureAlgorithm.HS512).
                     compact();
+    }
 
-        }catch (JwtException e){
-
-            System.out.println(e.getMessage());
-
-            return null;
-
-        }
+    @Override
+    public String gerarRefreshToken(UsuarioEntidade usuarioEntidade) {
+        return   Jwts.builder()
+                .setIssuer("auth-web1-noticias-app")
+                .setSubject(usuarioEntidade.getUsuTxLogin())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis()+864000000))
+                .signWith(getSignKey(), SignatureAlgorithm.HS512).
+                compact();
     }
 
     @Override
     public String validarToken(String token) {
 
-        return null;
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build().
+                parseClaimsJws(token).
+                getBody().
+                getSubject();
 
     }
 
+
+
     @Override
-    public String gerarTokenTemporario() {
-        return null;
+    public String gerarTokenTemporario(UsuarioEntidade usuarioEntidade) {
+        return   Jwts.builder()
+                .setIssuer("auth-web1-noticias-app")
+                .setSubject(usuarioEntidade.getUsuTxLogin())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis()+3600000))
+                .signWith(getSignKey(), SignatureAlgorithm.HS512).
+                compact();
     }
 
     private Key getSignKey(){

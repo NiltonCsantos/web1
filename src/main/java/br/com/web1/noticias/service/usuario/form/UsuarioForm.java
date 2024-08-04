@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 public record UsuarioForm(
         @NotBlank(message = "o campo nome é obrigatório")
+        @Size(min = 8, message = "o campo login deve ter no mínimo 8 carácteres")
         String usuTxNome,
         @NotBlank(message = "o campo email é obrigatório")
         @Email(message = "o campo email está inválido")
@@ -16,8 +17,9 @@ public record UsuarioForm(
         @NotNull(message = "o campo data nascimento é obrigatório")
         LocalDate usutxDtNascimento,
         @NotBlank(message = "o campo login é obrigatório")
-        String usuTxlogin,
+        String usuTxLogin,
         @NotBlank(message = "o campo senha é obrigatório")
+        @Size(message = "o campo senha deve ter no mínimo 8 carácteres")
         String usuTxSenha,
         @NotBlank(message = "o campo telefone é obrigatório")
         @Size(min = 11, max = 11, message = "o campo telefone deve ter 11 caracteres")

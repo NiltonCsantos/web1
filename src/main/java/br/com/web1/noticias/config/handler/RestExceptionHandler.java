@@ -1,12 +1,18 @@
 package br.com.web1.noticias.config.handler;
 
 import br.com.web1.noticias.exception.NotFoundException;
+import br.com.web1.noticias.exception.RegistredException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,7 +37,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    private ResponseEntity<RestErrorMessage> requerUmCorpo(HttpMessageNotReadableException ex, HttpServletRequest request, Locale locale){
+    private ResponseEntity<RestErrorMessage> handleRequerUmCorpo(HttpMessageNotReadableException ex, HttpServletRequest request, Locale locale){
         logger.error(ex.getMessage(), ex);
         final RestErrorMessage message= RestErrorMessage.builder()
                 .error(ex.getClass().getSimpleName())
@@ -83,6 +89,56 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<RestErrorMessage> handlePSQLException(DisabledException ex, HttpServletRequest request, Locale locale) {
+
+        logger.error(ex.getMessage(), ex);
+
+        var messagemPersonalizada = ex.getMessage() + ". Para fazer login, acesse o campo ATIVAR CONTA, acesse seu e-mail e clique no link que te enviamos.";
+
+        var message = this.gerarRestErrorMessageDinamico(HttpStatus.FORBIDDEN, new DisabledException(messagemPersonalizada), request, locale);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<RestErrorMessage> handleAuthException(BadCredentialsException ex, HttpServletRequest request, Locale locale) {
+
+        logger.error(ex.getMessage(), ex);
+
+        var message = this.gerarRestErrorMessageDinamico(HttpStatus.FORBIDDEN, ex, request, locale);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<RestErrorMessage> handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request, Locale locale) {
+
+        if (ex.getCause() instanceof ConstraintViolationException) {
+
+            logger.error(ex.getMessage(), ex);
+
+            var campo = extrairDadoUnico(ex.getMessage()) + " Já é utilizaodo por outro usuário";
+
+            System.out.println("CAMPO");
+            System.out.println(campo);
+
+            var message = this.gerarRestErrorMessageDinamico(HttpStatus.CONFLICT, new DataIntegrityViolationException(campo), request, locale);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+
+        }
+
+        var message = this.gerarRestErrorMessageErroInterno( ex, request, locale);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+    }
+    @ExceptionHandler(RegistredException.class)
+    public ResponseEntity<RestErrorMessage> handleRegistredException (RegistredException ex, HttpServletRequest request, Locale locale) {
+
+        logger.error(ex.getMessage(), ex);
+
+        var message = this.gerarRestErrorMessageDinamico(HttpStatus.CONFLICT, ex, request, locale);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
     private List<ValidateExceptionResponse.Field> processarErros(List<FieldError> fieldErrors) {
         return fieldErrors.stream()
                 .map(fieldError -> ValidateExceptionResponse.Field.builder()
@@ -116,8 +172,17 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestErrorMessage> handleGlobalException(Exception ex, HttpServletRequest request, Locale locale) {
+        logger.error(ex.getMessage(), ex);
         var message = gerarRestErrorMessageErroInterno(ex, request, locale);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+    }
+
+    private String extrairDadoUnico(String message) {
+        String[] parts = message.split("Detalhe: Chave .*?=\\(");
+        if (parts.length > 1) {
+            return parts[1].split("\\)")[0];
+        }
+        return null;
     }
 
 

@@ -1,6 +1,8 @@
 package br.com.web1.noticias.controller.authentication;
 
 import br.com.web1.noticias.service.authentication.AuthenticationService;
+import br.com.web1.noticias.service.authentication.dto.AuthenticationDto;
+import br.com.web1.noticias.service.authentication.form.AuthenticationForm;
 import br.com.web1.noticias.service.usuario.dto.Usuariodto;
 import br.com.web1.noticias.service.usuario.form.UsuarioForm;
 import jakarta.validation.Valid;
@@ -20,15 +22,17 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
 
-//    @PostMapping("/login")
-//    public ResponseEntity<Void> login(){
-//
-//
-//
-//    }
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationDto> login(@RequestBody @Valid AuthenticationForm form){
+
+        var authenticationDto = authenticationService.login(form);
+
+        return ResponseEntity.ok(authenticationDto);
+
+    }
 
     @PostMapping("/criar-conta")
-    public ResponseEntity<Usuariodto> criarConta(@RequestBody  UsuarioForm form){
+    public ResponseEntity<Usuariodto> criarConta(@RequestBody @Valid UsuarioForm form){
 
         var usuario = this.authenticationService.criarConta(form);
 

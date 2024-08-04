@@ -1,7 +1,7 @@
 package br.com.web1.noticias.config.security;
 
 import br.com.web1.noticias.exception.JwtExecption;
-import br.com.web1.noticias.service.authorization.AuthorizationService;
+import br.com.web1.noticias.service.authorization.CustomUserDetailsService;
 import br.com.web1.noticias.service.token.TokenService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -24,7 +24,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
-    private final AuthorizationService authorizationService;
+    private final CustomUserDetailsService authorizationService;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
