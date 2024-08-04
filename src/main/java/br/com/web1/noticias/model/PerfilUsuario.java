@@ -1,4 +1,4 @@
-package pdtest.auth.web1.model;
+package br.com.web1.noticias.model;
 
 public class PerfilUsuario {
 }
