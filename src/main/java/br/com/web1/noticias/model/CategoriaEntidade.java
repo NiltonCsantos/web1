@@ -13,8 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "cat_categoria", schema = "public")
-public class Categoria {
-
+public class CategoriaEntidade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +23,17 @@ public class Categoria {
     @Column(name = "cat_tx_nome")
     private String catTxNome;
 
+    @Column(name = "cat_tx_url")
+    private String catTxUrl;
+
+    @Column(name = "cat_bl_editoria")
+    private boolean catBlEditoria;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "categoria")
-    List<Noticia> noticias ;
+    private List<NoticiaEntidade> noticias ;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "categoria")
+    private List<CategoriaUsuarioEntidade> categoriaUsuarios;
 
 
 

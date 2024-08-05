@@ -40,7 +40,6 @@ public class SecurityConfig {
                     httpSecurityExceptionHandlingConfigurer
                             .accessDeniedHandler(accessDeniedHandler)
                             .authenticationEntryPoint(authenticationEntryPoint)
-                            .disable()
                     ;
 
                 })

@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Builder
 @Data
@@ -39,6 +40,9 @@ public class UsuarioEntidade implements UserDetails {
     private LocalDate usuDtNascimento;
     @Column(name = "usu_bl_ativo")
     private boolean usuBlAtivo;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "usuario")
+    private List<CategoriaUsuarioEntidade> categorias;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
