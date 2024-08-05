@@ -2,24 +2,26 @@ package br.com.web1.noticias.model;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "Noti_Noticias", schema = "public")
-@Getter
-@Setter
+@Table(name = "not_noticias", schema = "public")
 public class Noticia {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
-    private String nome;
-    private String descricao;
-    private Long noticia_Id;
+    @Column(name = "not_tx_nr_id")
+    private Long notNrId;
+    @Column(name = "not_tx_nome")
+    private String notTxNome;
+    @Column(name = "not_tx_descricao")
+    private String notTxDescricao;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cat_categoria_nr_id",nullable = false)
     private Categoria categoria;
-
-
 
 }
